@@ -32,7 +32,7 @@ async def read_todo(todo_id: int, db: Session = Depends(get_db)):
     todo_model = db.query(models.Todos).filter(models.Todos.id == todo_id).first()
     if todo_model is not None:
         return todo_model
-    raise 
+    raise http_exception()
 
 @app.post('/')
 async def create_todo(todo:Todo, db: Session = Depends(get_db)):
@@ -45,11 +45,39 @@ async def create_todo(todo:Todo, db: Session = Depends(get_db)):
     db.add(todo_model)
     db.commit()
 
+    return success_response(201)
+
+@app.put('/{todo_id}')
+async def update_todo(todo_id: int,todo:Todo, db: Session = Depends(get_db)):
+    todo_model = db.query(models.Todos).filter(models.Todos.id == todo_id).first()
+    if todo_model is None:
+        raise http_exception()
+    
+    todo_model.title = todo.title
+    todo_model.description = todo.description
+    todo_model.priority = todo.priority
+    todo_model.complete = todo.complete
+
+    db.add(todo_model)
+    db.commit()
+
+    return success_response(201)
+
+@app.delete('/{todo_id}')
+async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+    todo_model = db.query(models.Todos).filter(models.Todos.id == todo_id).first()
+    if todo_model is None:
+        raise http_exception()
+    db.query(models.Todos).filter(models.Todos.id == todo_id).delete()
+    db.commit()
+
+    return success_response(201)
+
+def success_response(status_code:int):
     return {
-        'status':201 ,
+        'status':status_code ,
         'transaction': 'Successfully'
     }
-
 
 def http_exception():
     return HTTPException(status_code=404,detail='Todos Not Found')
