@@ -1,1 +1,6 @@
 todoenv
+TodoApp/__pycache__
+TodoApp/routers/__pycache__
+TodoApp/company/__pycache__
+TodoApp/todos.db
+
